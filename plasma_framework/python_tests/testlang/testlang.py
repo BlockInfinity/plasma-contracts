@@ -60,18 +60,37 @@ class PlasmaBlock:
 
 
 class InFlightExit:
+    class WithdrawData:
+        def __init__(self, output_id, exit_target, token, amount, piggyback_bond_size):
+            self.output_id = output_id
+            self.exit_target = exit_target
+            self.token = token
+            self.amount = amount
+            self.piggyback_bond_size = piggyback_bond_size
 
-    def __init__(self, root_chain, in_flight_tx, exit_start_timestamp, exit_priority, exit_map, bond_owner,
+    def __init__(self, root_chain, in_flight_tx,
+                 is_canonical,
+                 exit_start_timestamp,
+                 exit_map,
+                 position,
+                 inputs,
+                 outputs,
+                 bond_owner,
+                 bond_size,
                  oldest_competitor):
+
         self.root_chain = root_chain
         self.in_flight_tx = in_flight_tx
+
+        self.is_canonical = is_canonical
         self.exit_start_timestamp = exit_start_timestamp
-        self.exit_priority = exit_priority
         self.exit_map = exit_map
+        self.position = position
+        self.inputs = dict(zip(range(len(inputs)), [InFlightExit.WithdrawData(*i) for i in inputs]))
+        self.outputs = dict(zip(range(len(outputs)), [InFlightExit.WithdrawData(*o) for o in outputs]))
         self.bond_owner = bond_owner
+        self.bond_size = bond_size
         self.oldest_competitor = oldest_competitor
-        self.inputs = {}
-        self.outputs = {}
 
     @property
     def challenge_flag_set(self):
@@ -81,7 +100,6 @@ class InFlightExit:
         input_info = self.inputs.get(index)
         if not input_info:
             input_info = TransactionOutput(*self.root_chain.getInFlightExitOutput(self.in_flight_tx.encoded, index))
-            # input_info.owner = address_to_hex(input_info.owner)
             self.inputs[index] = input_info
         return input_info
 
@@ -232,9 +250,9 @@ class TestingLanguage:
     def start_in_flight_exit(self, tx_id, bond=None, sender=None):
         if sender is None:
             sender = self.accounts[0]
-        (encoded_spend, encoded_inputs, proofs, signatures) = self.get_in_flight_exit_info(tx_id)
+        (encoded_spend, encoded_inputs, inputs_pos, proofs, signatures) = self.get_in_flight_exit_info(tx_id)
         bond = bond if bond is not None else self.root_chain.inFlightExitBond()
-        self.root_chain.startInFlightExit(encoded_spend, encoded_inputs, proofs, signatures,
+        self.root_chain.startInFlightExit(encoded_spend, encoded_inputs, proofs, signatures, inputs_pos,
                                           **{'value': bond, 'from': sender.address})
 
     def create_utxo(self, token=NULL_ADDRESS):
@@ -371,10 +389,12 @@ class TestingLanguage:
         if spend_tx is None:
             spend_tx = self.child_chain.get_transaction(tx_id)
         input_txs = []
+        inputs_pos = []
         proofs = b''
         signatures = b''
         for i in range(0, len(spend_tx.inputs)):
             tx_input = spend_tx.inputs[i]
+            inputs_pos.append(tx_input.identifier)
             (blknum, _, _) = decode_utxo_id(tx_input.identifier)
             if blknum == 0:
                 continue
@@ -382,8 +402,8 @@ class TestingLanguage:
             input_txs.append(input_tx)
             proofs += self.get_merkle_proof(tx_input.identifier)
             signatures += spend_tx.signatures[i]
-        encoded_inputs = rlp.encode(input_txs, rlp.sedes.CountableList(Transaction, 4))
-        return spend_tx.encoded, encoded_inputs, proofs, signatures
+        encoded_inputs = [i.encoded for i in input_txs]
+        return spend_tx.encoded, encoded_inputs, inputs_pos, proofs, signatures
 
     def get_in_flight_exit_id(self, tx_id):
         spend_tx = self.child_chain.get_transaction(tx_id)

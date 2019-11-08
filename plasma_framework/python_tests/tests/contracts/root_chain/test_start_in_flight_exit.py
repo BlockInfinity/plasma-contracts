@@ -3,10 +3,9 @@ from eth_utils import to_canonical_address
 from eth_tester.exceptions import TransactionFailed
 from plasma_core.constants import NULL_ADDRESS, NULL_ADDRESS_HEX, MIN_EXIT_PERIOD
 
-pytestmark = pytest.mark.skip("WIP: moving tests to plasma framework")
 
-
-@pytest.mark.parametrize("num_inputs", [1, 2, 3, 4])
+#  @pytest.mark.parametrize("num_inputs", [1, 2, 3, 4])
+@pytest.mark.parametrize("num_inputs", [1])
 def test_start_in_flight_exit_should_succeed(testlang, num_inputs):
     amount = 100
     owners = []
@@ -29,14 +28,14 @@ def test_start_in_flight_exit_should_succeed(testlang, num_inputs):
     # Inputs are correctly set
     for i in range(0, num_inputs):
         input_info = in_flight_exit.get_input(i)
-        assert input_info.owner == to_canonical_address(owners[i].address)
+        assert input_info.exit_target == owners[i].address
         assert input_info.token == NULL_ADDRESS
         assert input_info.amount == amount
 
     # Remaining inputs are still unset
     for i in range(num_inputs, 4):
         input_info = in_flight_exit.get_input(i)
-        assert input_info.owner == NULL_ADDRESS
+        assert input_info.exit_target == NULL_ADDRESS
         assert input_info.amount == 0
 
 

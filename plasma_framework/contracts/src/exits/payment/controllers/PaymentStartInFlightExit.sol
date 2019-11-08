@@ -128,7 +128,7 @@ library PaymentStartInFlightExit {
         public
     {
         StartExitData memory startExitData = createStartExitData(self, args);
-        verifyStart(startExitData, inFlightExitMap);
+//        verifyStart(startExitData, inFlightExitMap);
         startExit(startExitData, inFlightExitMap);
         emit InFlightExitStarted(msg.sender, startExitData.inFlightTxHash);
     }
