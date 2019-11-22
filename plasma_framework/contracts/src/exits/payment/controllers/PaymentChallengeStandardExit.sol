@@ -95,7 +95,7 @@ library PaymentChallengeStandardExit {
         verifyChallengeTxProtocolFinalized(data);
         verifySpendingCondition(data);
 
-        delete exitMap.exits[args.exitId];
+        exitMap.exits[args.exitId].amount = 0;
 
         SafeEthTransfer.transferRevertOnError(msg.sender, data.exitData.bondSize, self.safeGasStipend);
 

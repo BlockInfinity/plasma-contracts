@@ -324,11 +324,10 @@ contract('PaymentStandardExitRouter', ([_, alice, bob]) => {
                     this.tx = await this.exitGame.challengeStandardExit(this.args, { from: bob });
                 });
 
-                it('should delete the exit data when successfully challenged', async () => {
+                it('should zero the amount data when successfully challenged', async () => {
                     const exitData = await this.exitGame.standardExits(this.args.exitId);
-                    Object.values(exitData).forEach((val) => {
-                        expect(val).to.be.oneOf([false, '0', EMPTY_BYTES_32, constants.ZERO_ADDRESS]);
-                    });
+                    expect(exitData.amount).to.equal(0);
+                    expect(exitData.exitTarget).to.equal(alice);
                 });
 
                 it('should transfer the standard exit bond to challenger when successfully challenged', async () => {

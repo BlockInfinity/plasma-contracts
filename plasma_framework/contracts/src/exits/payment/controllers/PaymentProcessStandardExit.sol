@@ -48,8 +48,10 @@ library PaymentProcessStandardExit {
     {
         PaymentExitDataModel.StandardExit memory exit = exitMap.exits[exitId];
 
+        // free storage for a successfully challenged exit
         if (!exit.exitable || self.framework.isOutputSpent(exit.outputId)) {
             emit ExitOmitted(exitId);
+            delete exitMap.exits[exitId];
             return;
         }
 
