@@ -390,8 +390,8 @@ class TestingLanguage:
             spend_tx = self.child_chain.get_transaction(tx_id)
         input_txs = []
         inputs_pos = []
-        proofs = b''
-        signatures = b''
+        proofs = []
+        signatures = []
         for i in range(0, len(spend_tx.inputs)):
             tx_input = spend_tx.inputs[i]
             inputs_pos.append(tx_input.identifier)
@@ -400,8 +400,8 @@ class TestingLanguage:
                 continue
             input_tx = self.child_chain.get_transaction(tx_input.identifier)
             input_txs.append(input_tx)
-            proofs += self.get_merkle_proof(tx_input.identifier)
-            signatures += spend_tx.signatures[i]
+            proofs.append(self.get_merkle_proof(tx_input.identifier))
+            signatures.append(spend_tx.signatures[i])
         encoded_inputs = [i.encoded for i in input_txs]
         return spend_tx.encoded, encoded_inputs, inputs_pos, proofs, signatures
 

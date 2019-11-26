@@ -4,8 +4,7 @@ from eth_tester.exceptions import TransactionFailed
 from plasma_core.constants import NULL_ADDRESS, NULL_ADDRESS_HEX, MIN_EXIT_PERIOD
 
 
-#  @pytest.mark.parametrize("num_inputs", [1, 2, 3, 4])
-@pytest.mark.parametrize("num_inputs", [1])
+@pytest.mark.parametrize("num_inputs", [1, 2, 3, 4])
 def test_start_in_flight_exit_should_succeed(testlang, num_inputs):
     amount = 100
     owners = []
@@ -29,13 +28,13 @@ def test_start_in_flight_exit_should_succeed(testlang, num_inputs):
     for i in range(0, num_inputs):
         input_info = in_flight_exit.get_input(i)
         assert input_info.exit_target == owners[i].address
-        assert input_info.token == NULL_ADDRESS
+        assert input_info.token == NULL_ADDRESS_HEX
         assert input_info.amount == amount
 
     # Remaining inputs are still unset
     for i in range(num_inputs, 4):
         input_info = in_flight_exit.get_input(i)
-        assert input_info.exit_target == NULL_ADDRESS
+        assert input_info.exit_target == NULL_ADDRESS_HEX
         assert input_info.amount == 0
 
 
@@ -62,14 +61,14 @@ def test_start_in_flight_exit_with_erc20_tokens_should_succeed(testlang, token, 
     # Inputs are correctly set
     for i in range(0, num_inputs):
         input_info = in_flight_exit.get_input(i)
-        assert input_info.owner == to_canonical_address(owners[i].address)
-        assert input_info.token == to_canonical_address(token.address)
+        assert input_info.exit_target == owners[i].address
+        assert input_info.token == token.address
         assert input_info.amount == amount
 
     # Remaining inputs are still unset
     for i in range(num_inputs, 4):
         input_info = in_flight_exit.get_input(i)
-        assert input_info.owner == NULL_ADDRESS
+        assert input_info.exit_target == NULL_ADDRESS_HEX
         assert input_info.amount == 0
 
 
@@ -94,19 +93,19 @@ def test_start_in_flight_exit_with_erc20_token_and_eth_should_succeed(testlang, 
 
     # Inputs are correctly set
     input_info = in_flight_exit.get_input(0)
-    assert input_info.owner == to_canonical_address(owner.address)
-    assert input_info.token == NULL_ADDRESS
+    assert input_info.exit_target == owner.address
+    assert input_info.token == NULL_ADDRESS_HEX
     assert input_info.amount == 100
 
     input_info = in_flight_exit.get_input(1)
-    assert input_info.owner == to_canonical_address(owner.address)
-    assert input_info.token == to_canonical_address(token.address)
+    assert input_info.exit_target == owner.address
+    assert input_info.token == token.address
     assert input_info.amount == 110
 
     # Remaining inputs are still unset
     for i in range(2, 4):
         input_info = in_flight_exit.get_input(i)
-        assert input_info.owner == NULL_ADDRESS
+        assert input_info.exit_target == NULL_ADDRESS_HEX
         assert input_info.amount == 0
 
 

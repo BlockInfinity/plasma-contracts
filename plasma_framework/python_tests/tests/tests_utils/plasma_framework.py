@@ -119,7 +119,7 @@ class PlasmaFramework:
 
         libs, libs_map = self._deploy_libraries(libs, get_contract, maintainer)
 
-        paymet_exit_game_args = (
+        payment_exit_game_args = (
             self.plasma_framework.address,
             self.eth_vault_id,
             self.erc20_vault_id,
@@ -132,7 +132,7 @@ class PlasmaFramework:
         )
         payment_exit_game = get_contract("PaymentExitGame",
                                          sender=maintainer,
-                                         args=(paymet_exit_game_args,),
+                                         args=(payment_exit_game_args,),
                                          libraries=libs_map)
 
         return payment_exit_game
@@ -213,17 +213,17 @@ class PlasmaFramework:
 
         # The following arguments are to be used in the future
         output_guard_preimages_for_inputs = [EMPTY_BYTES] * len(input_utxos_pos)
-        input_tx_confirm_sigs = []
-        input_spending_cond_args = []
+        input_tx_confirm_sigs = [EMPTY_BYTES] * len(input_utxos_pos)
+        input_spending_cond_args = [EMPTY_BYTES] * len(input_utxos_pos)
 
         args = [in_flight_tx,
                 input_txs,
                 input_utxos_pos,
                 output_guard_preimages_for_inputs,
-                [],
-                [],
-                [],
-                []]
+                input_txs_inclusion_proofs,
+                input_tx_confirm_sigs,
+                in_flight_tx_witnesses,
+                input_spending_cond_args]
 
         self.payment_exit_game.startInFlightExit(args, **kwargs)
 
