@@ -23,7 +23,8 @@ const {
 } = require('openzeppelin-test-helpers');
 const { expect } = require('chai');
 const {
-    TX_TYPE, OUTPUT_TYPE, EMPTY_BYTES, CHILD_BLOCK_INTERVAL, VAULT_ID, PROTOCOL,
+    TX_TYPE, OUTPUT_TYPE, EMPTY_BYTES, CHILD_BLOCK_INTERVAL,
+    VAULT_ID, PROTOCOL, EMPTY_BYTES_32,
 } = require('../../../helpers/constants.js');
 const { buildUtxoPos } = require('../../../helpers/positions.js');
 const { createInputTransaction, createInFlightTx } = require('../../../helpers/ife.js');
@@ -113,8 +114,8 @@ contract('PaymentChallengeIFEInputSpent', ([_, alice, inputOwner, outputOwner, c
             const rlpInFlightTxBytes = web3.utils.bytesToHex(inFlightTx.rlpEncoded());
 
             const emptyWithdrawData = {
-                outputId: web3.utils.sha3('dummy output id'),
-                outputGuard: web3.utils.sha3('dummy output guard'),
+                outputId: EMPTY_BYTES_32,
+                outputGuard: constants.ZERO_ADDRESS,
                 exitTarget: constants.ZERO_ADDRESS,
                 token: constants.ZERO_ADDRESS,
                 amount: 0,
